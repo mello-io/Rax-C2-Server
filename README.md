@@ -93,12 +93,16 @@ RaxC2-venv/bin/python3 server.py
 <br>
 
 <h2>🔹 How to Send Commands </h2>
-Currentl stage: Hardcoded support only – listen for connections and watch outputs.
+Current stage:
 
-Advanced - feature development ⚠️ : Create an admin console that sends commands like:
+- Hardcoded test code - ✅
+- Curl based json request – ✅
+
+Advanced - feature development ⚠️ : Create an admin console that sends commands
 
 ```bash
-curl -X POST https://<C2-IP>:443/send_command -d 'whoami'
+curl -X POST https://<C2-IP>:5000/send -H "Content-Type: application/json" -d '{"cmd": "whoami"}'
+
 ```
 
 <br>
