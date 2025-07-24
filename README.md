@@ -20,7 +20,6 @@ Build a custom C2 framework that:
 ```bash
 
 sudo apt update && sudo apt install python3 python3-pip git
-pip3 install flask flask-socketio cryptography
 
 mkdir ~/RaxC2
 cd ~/RaxC2
@@ -83,7 +82,11 @@ pyinstaller --onefile agent.py
 ```
 - Run C2 (python3 server.py) and issue commands.
 ```bash
-python3 server.py
+
+python3 -m venv RaxC2-venv
+RaxC2-venv/bin/pip install flask flask-socketio cryptography requests pyfiglet
+RaxC2-venv/bin/python3 server.py
+
 ```  
 - Exfiltrated data appears in the server console or saved logs. 
 
